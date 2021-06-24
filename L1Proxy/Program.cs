@@ -47,11 +47,20 @@ namespace L1Proxy
                         text.Add(post.Body);
                         text.Add(String.Empty);
                     }
+                    else
+                    {
+                        throw new ApplicationException("Получен некорректый пост");
+                    }
                 });
-                
+
                 // Асинхронно сохраняем все данные разом
                 await File.WriteAllLinesAsync(filePath, text, _cts.Token);
                 Console.WriteLine("Данные записаны");
+            }
+            catch (ApplicationException e)
+            {
+                // сработало прерывание по таймауту
+                Console.WriteLine($"Выполнение было прервано: {e.Message}");
             }
             catch (TaskCanceledException)
             {
@@ -90,6 +99,11 @@ namespace L1Proxy
                 {
                     // Если данные не получены, ожидаем 1 секунду и повторяем запрос
                     await Task.Delay(1000);
+                }
+                
+                if (_cts.IsCancellationRequested)
+                {
+                    throw new ApplicationException($"Неудалось получить данные по {url}");
                 }
             }
             

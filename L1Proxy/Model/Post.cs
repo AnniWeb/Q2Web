@@ -23,7 +23,7 @@ namespace L1Proxy.Model
 
         public bool Valid()
         {
-            bool result = UserId > 0 && Id > 0 && Title.Length > 0;
+            bool result = UserId > 0 && Id > 0 && !string.IsNullOrEmpty(Title);
 
             return result;
         }
