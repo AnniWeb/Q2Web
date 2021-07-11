@@ -1,0 +1,22 @@
+﻿using System.Linq;
+using Database.Model;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+namespace Database
+{
+    public class ApplicationDataContext : DbContext
+    {
+        public ApplicationDataContext(DbContextOptions<ApplicationDataContext> options) : base(options)
+        {
+            
+        }
+
+        public  DbSet<Kittens> Kittens { get; set; }
+        
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            
+        }
+    }
+}
