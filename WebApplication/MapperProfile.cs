@@ -11,6 +11,9 @@ namespace WebApplication
         {
             CreateMap<Kittens, KittenResponse>();
             CreateMap<KittenRequest, Kittens>();
+            CreateMap<DbPersonRequest, Persons>();
+            CreateMap<PersonRequest, Persons>();
+            CreateMap<Persons, PersonResponse>();
         }
     }
 }

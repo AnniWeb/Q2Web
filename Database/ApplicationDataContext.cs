@@ -13,6 +13,7 @@ namespace Database
         }
 
         public  DbSet<Kittens> Kittens { get; set; }
+        public  DbSet<Persons> Persons { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
