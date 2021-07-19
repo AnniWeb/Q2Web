@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Database;
 using Database.Model;
-using Database.Repository;
+using DataLayer.Abstractions.Repository;
+using DataLayer.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WebApplication.RestRequest;
@@ -18,8 +19,8 @@ namespace WebApplication.Controllers
     public class KittenController : ControllerBase
     {
         private readonly ILogger<KittenController> _logger;
-        private IKittenRepository _repository;
-        private IMapper _mapper;
+        private readonly IKittenRepository _repository;
+        private readonly IMapper _mapper;
 
         public KittenController(
             ILogger<KittenController> logger,
@@ -33,13 +34,13 @@ namespace WebApplication.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<KittenResponse> GetList()
+        public async Task<IEnumerable<KittenResponse>> GetList()
         {
             try
             {
                 _logger?.LogDebug("GetList");
                 var list = new List<KittenResponse>();
-                foreach (var kitten in _repository.Get())
+                foreach (var kitten in await _repository.Get())
                 {
                     list.Add(_mapper.Map<KittenResponse>(kitten));
                 }

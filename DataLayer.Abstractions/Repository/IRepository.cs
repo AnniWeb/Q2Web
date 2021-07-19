@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Database.Model;
 
-namespace Database.Repository
+namespace DataLayer.Abstractions.Repository
 {
     public interface IRepository<TEntity> where TEntity : BaseModel<int>
     {

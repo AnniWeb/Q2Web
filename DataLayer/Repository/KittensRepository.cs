@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Database;
 using Database.Model;
 using Microsoft.EntityFrameworkCore;
+using DataLayer.Abstractions.Repository;
 
-namespace Database.Repository
+namespace DataLayer.Repository
 {
     public class KittensRepository : IKittenRepository
     {

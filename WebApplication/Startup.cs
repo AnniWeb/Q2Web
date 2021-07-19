@@ -14,8 +14,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Config;
 using Database;
-using Database.Model;
-using Database.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace WebApplication

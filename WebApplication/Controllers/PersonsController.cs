@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Database;
 using Database.Model;
-using Database.Repository;
+using DataLayer.Abstractions.Repository;
+using DataLayer.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WebApplication.RestRequest;
@@ -18,9 +19,9 @@ namespace WebApplication.Controllers
     [Description("Персоны")]
     public class PersonsController : ControllerBase
     {
-        private IMapper _mapper;
-        private ILogger<PersonsController> _logger;
-        private IPersonRepository _repository;
+        private readonly IMapper _mapper;
+        private readonly ILogger<PersonsController> _logger;
+        private readonly IPersonRepository _repository;
 
         public PersonsController(
             ILogger<PersonsController> logger,
