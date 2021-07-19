@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Database.Model;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,86 +17,42 @@ namespace Database.Repository
             _context = context;
         }
         
-        public bool Add(Persons entity)
+        public async Task<Persons> GetById(int id) => await _context.Persons.FindAsync(id);
+        public async Task<IEnumerable<Persons>> Get() => await _context.Persons.ToListAsync();
+
+        public async Task Add(Persons entity)
         {
-            try
-            {
-                _context.Add(entity);
-                _context.SaveChanges();
-            }
-            catch (Exception exception)
-            {
-                return false;
-            }
- 
-            return true;
+            await _context.AddAsync(entity);
+            await _context.SaveChangesAsync();
         }
 
-        public IEnumerable<Persons> Get()
+        public async Task Update(Persons entity)
         {
-            return _context.Persons.ToList();
+            _context.Entry(entity).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
         }
 
-        public bool Update(Persons entity)
+        public async Task Delete(int id)
         {
-            try
+            var kitten = await GetById(id);
+            if (kitten == null)
             {
-                if (entity.Id == null || entity.Id < 1)
-                {
-                    throw new ArgumentException();
-                }
-                var person = GetById(entity.Id);
-                if (person == null)
-                {
-                    throw new KeyNotFoundException();
-                }
-                _context.Update(person);
-                _context.SaveChanges();
+                throw new KeyNotFoundException();
             }
-            catch (Exception exception)
-            {
-                return false;
-            }
- 
-            return true;
+            _context.Persons.Remove(kitten);
+            await _context.SaveChangesAsync();
         }
 
-        public bool Delete(int id)
+        public async Task<IEnumerable<Persons>> GetListWithNav(int offset, int limit)
         {
-            try
-            {
-                var person = GetById(id);
-                if (person == null)
-                {
-                    throw new KeyNotFoundException();
-                }
-
-                _context.Remove(person);
-                _context.SaveChanges();
-            }
-            catch (Exception exception)
-            {
-                return false;
-            }
-
-            return true;
+            return await _context.Persons.Skip(offset).Take(limit).ToListAsync();
         }
 
-        public Persons GetById(int id)
+        public async Task<IEnumerable<Persons>> Search(string term)
         {
-            return _context.Persons.Where(person => person.Id == id)?.First();
-        }
-
-        public IEnumerable<Persons> GetListWithNav(int offset, int limit)
-        {
-            return _context.Persons.Skip(offset).Take(limit).ToList();
-        }
-
-        public IEnumerable<Persons> Search(string term)
-        {
-            return _context.Persons.Where(person
+            return await _context.Persons.Where(person
                 => EF.Functions.Like(person.FirstName, $"%{term}%") 
-                   || EF.Functions.Like(person.SecondName, $"%{term}%"));
+                   || EF.Functions.Like(person.SecondName, $"%{term}%")).ToListAsync();
         }
     }
 }

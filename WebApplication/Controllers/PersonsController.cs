@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using AutoMapper;
 using Database;
 using Database.Model;
@@ -34,7 +35,7 @@ namespace WebApplication.Controllers
 
         [HttpGet("/persons/{id}")]
         [Description("Получение человека по идентификатору")]
-        public PersonResponse GetById([FromRoute] int id)
+        public async Task<PersonResponse> GetById([FromRoute] int id)
         {
             _logger?.LogDebug("GetById", id);
             
@@ -45,7 +46,7 @@ namespace WebApplication.Controllers
                     throw new ArgumentException("Невалидный ид");
                 }
                 
-                return _mapper.Map<PersonResponse>(_repository.GetById(id));
+                return _mapper.Map<PersonResponse>(await _repository.GetById(id));
             }
             catch (Exception e)
             {
@@ -57,7 +58,7 @@ namespace WebApplication.Controllers
         
         [HttpGet("/persons/search")]
         [Description("Поиск человека по имени")]
-        public IEnumerable<PersonResponse> SearchByTerm([FromQuery] string term)
+        public async Task<IEnumerable<PersonResponse>> SearchByTerm([FromQuery] string term)
         {
             _logger?.LogDebug("SearchByTerm", term);
             
@@ -69,7 +70,7 @@ namespace WebApplication.Controllers
                     throw new ArgumentException("Не заполнен запрос");
                 }
                 
-                foreach (var person in _repository.Search(term))
+                foreach (var person in await _repository.Search(term))
                 {
                     list.Add(_mapper.Map<PersonResponse>(person));
                 }
@@ -84,7 +85,7 @@ namespace WebApplication.Controllers
         
         [HttpGet("/persons")]
         [Description("Получение списка людей с пагинацией")]
-        public IEnumerable<PersonResponse> GetList([FromQuery] int offset = 5, [FromQuery] int limit = 10)
+        public async Task<IEnumerable<PersonResponse>> GetList([FromQuery] int offset = 5, [FromQuery] int limit = 10)
         {
             _logger?.LogDebug("GetList");
             
@@ -96,7 +97,7 @@ namespace WebApplication.Controllers
                     throw new ArgumentException("Не валидный запрос");
                 }
                 
-                foreach (var person in _repository.GetListWithNav(offset, limit))
+                foreach (var person in await _repository.GetListWithNav(offset, limit))
                 {
                     list.Add(_mapper.Map<PersonResponse>(person));
                 }
@@ -111,13 +112,14 @@ namespace WebApplication.Controllers
         
         [HttpPost("/persons")]
         [Description("Добавление новой персоны в коллекцию")]
-        public IActionResult Add([FromBody] PersonRequest newPerson)
+        public async Task<IActionResult> Add([FromBody] PersonRequest newPerson)
         {
             _logger?.LogDebug("Add", newPerson);
             
             try
             {
-                return new CreatedResult("Ok", _repository.Add(_mapper.Map<Persons>(newPerson)));
+                await _repository.Add(_mapper.Map<Persons>(newPerson));
+                return new CreatedResult("Ok", true);
             }
             catch (Exception e)
             {
@@ -129,13 +131,14 @@ namespace WebApplication.Controllers
         
         [HttpPut("/persons")]
         [Description("Обновление существующей персоны в коллекции")]
-        public IActionResult Update([FromBody] DbPersonRequest newPerson)
+        public async Task<IActionResult> Update([FromBody] DbPersonRequest newPerson)
         {
             _logger?.LogDebug("Update", newPerson);
             
             try
             {
-                return new CreatedResult("Ok", _repository.Update(_mapper.Map<Persons>(newPerson)));
+                await _repository.Update(_mapper.Map<Persons>(newPerson));
+                return Ok();
             }
             catch (Exception e)
             {
@@ -147,16 +150,14 @@ namespace WebApplication.Controllers
         
         [HttpDelete("/persons/{id}")]
         [Description("Удаление персоны из коллекции")]
-        public IActionResult Delete([FromRoute] int id)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
             _logger?.LogDebug("Delete", id);
             
             try
             {
-                if (_repository.Delete(id))
-                {
-                    return Ok();
-                };
+                await _repository.Delete(id);
+                return Ok();
             }
             catch (Exception e)
             {
