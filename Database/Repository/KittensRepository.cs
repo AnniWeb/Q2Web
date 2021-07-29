@@ -1,47 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Database.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace Database.Repository
 {
     public class KittensRepository : IKittenRepository
     {
-        private ApplicationDataContext _context;
+        private readonly ApplicationDataContext _context;
 
         public KittensRepository(ApplicationDataContext context)
         {
             _context = context;
         }
         
-        public bool Add(Kittens entity)
+        public async Task<Kittens> GetById(int id) => await _context.Kittens.FindAsync(id);
+        public async Task<IEnumerable<Kittens>> Get() => await _context.Kittens.ToListAsync();
+
+        public async Task Add(Kittens entity)
         {
-            try
+            await _context.AddAsync(entity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task Update(Kittens entity)
+        {
+            if (entity.Id == null || entity.Id < 1)
             {
-                _context.Add(entity);
-                _context.SaveChanges();
+                throw new ArgumentException();
             }
-            catch (Exception exception)
+            _context.Entry(entity).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task Delete(int id)
+        {
+            var kitten = await GetById(id);
+            if (kitten == null)
             {
-                return false;
+                throw new KeyNotFoundException();
             }
- 
-            return true;
-        }
-
-        public IEnumerable<Kittens> Get()
-        {
-            return _context.Kittens.ToList();
-        }
-
-        public bool Update(Kittens entity)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public bool Delete(int id)
-        {
-            throw new System.NotImplementedException();
+            _context.Kittens.Remove(kitten);
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -1,16 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Database.Model;
 
 namespace Database.Repository
 {
-    public interface IRepository<TEntity>
+    public interface IRepository<TEntity> where TEntity : BaseModel<int>
     {
-        bool Add(TEntity entity);
+        Task Add(TEntity entity);
  
-        IEnumerable<TEntity> Get();
+        Task<IEnumerable<TEntity>> Get();
+        
+        Task<TEntity> GetById(int id);
  
-        bool Update(TEntity entity);
+        Task Update(TEntity entity);
  
-        bool Delete(int id);
+        Task Delete(int id);
     }
 
 }
