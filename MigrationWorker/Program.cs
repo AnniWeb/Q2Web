@@ -34,8 +34,8 @@ namespace MigrationWorker
                                     category == DbLoggerCategory.Database.Command.Name
                                     && level == LogLevel.Information);
                         }));
-                        services.AddHostedService<Worker>();
                     });
+                    services.AddHostedService<Worker>();
 
                 });
     }

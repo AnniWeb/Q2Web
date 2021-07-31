@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using AutoMapper;
-using Database;
-using Database.Model;
+using BusinessLogic.Abstractions.Model;
+using BusinessLogic.Abstractions.Service;
 using DataLayer.Abstractions;
-using DataLayer.Abstractions.Repository;
-using DataLayer.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WebApplication.RestRequest;
@@ -22,26 +20,25 @@ namespace WebApplication.Controllers
     {
         private readonly IMapper _mapper;
         private readonly ILogger<ClinicController> _logger;
-        private readonly IClinicRepository _repository;
+        private readonly IClinicService _service;
 
         public ClinicController(
+            IClinicService service,
             ILogger<ClinicController> logger,
-            ApplicationDataContext context, 
             IMapper mapper
         )
         {
             _logger = logger;
-            _repository = new ClinicRepository(context);
+            _service = service;
             _mapper = mapper;
         }
         
         [HttpGet("/clinics")]
         [Description("Получение списка клиник с пагинацией")]
-        public async Task<IEnumerable<ClinicResponse>> GetList([FromQuery] int offset = 5, [FromQuery] int limit = 10)
+        public async Task<IEnumerable<ClinicResponse>> GetList([FromQuery] int offset = 0, [FromQuery] int limit = 10)
         {
             _logger?.LogDebug("GetList");
             
-            var list = new List<ClinicResponse>();
             try
             {
                 if (offset < 0 || limit < 1)
@@ -49,74 +46,63 @@ namespace WebApplication.Controllers
                     throw new ArgumentException("Не валидный запрос");
                 }
                 
-                foreach (var person in await _repository.GetList(new Paginator{Offset = offset, Limit = limit}))
-                {
-                    list.Add(_mapper.Map<ClinicResponse>(person));
-                }
+                var data = await _service.GetList(offset, limit);
+                return _mapper.Map<IEnumerable<ClinicResponse>>(data);
             }
             catch (Exception e)
             {
                 _logger?.LogError("GetList", e);
             }
             
-            return list;
+            return new List<ClinicResponse>();
         }
         
         [HttpPost("/clinics")]
         [Description("Добавление новой клиники в коллекцию")]
-        public async Task<IActionResult> Add([FromBody] ClinicRequest clinic)
+        public async Task Add([FromBody] ClinicRequest clinic)
         {
             _logger?.LogDebug("Add", clinic);
             
             try
             {
-                await _repository.Add(_mapper.Map<Clinic>(clinic));
-                return new CreatedResult("Ok", true);
+                await _service.Add(_mapper.Map<Clinic>(clinic));
             }
             catch (Exception e)
             {
                 _logger?.LogError("Add", e);
             }
-            
-            return null;
         }
         
         [HttpPut("/clinics")]
         [Description("Обновление существующей клиники в коллекции")]
-        public async Task<IActionResult> Update([FromBody] DbClinicRequest clinic)
+        public async Task Update([FromBody] DbClinicRequest clinic)
         {
             _logger?.LogDebug("Update", clinic);
             
             try
             {
-                await _repository.Update(_mapper.Map<Clinic>(clinic));
-                return Ok();
+                await _service.Update(_mapper.Map<Clinic>(clinic));
             }
             catch (Exception e)
             {
                 _logger?.LogError("Update", e);
             }
-            
-            return NotFound();
         }
         
         [HttpDelete("/clinics/{id}")]
         [Description("Удаление клиники из коллекции")]
-        public async Task<IActionResult> Delete([FromRoute] int id)
+        public async Task Delete([FromRoute] int id)
         {
             _logger?.LogDebug("Delete", id);
             
             try
             {
-                await _repository.Delete(id);
-                return Ok();
+                await _service.Delete(id);
             }
             catch (Exception e)
             {
                 _logger?.LogError("Delete", e);
             }
-            
-            return NotFound();
         }
 
         [HttpGet("/clinics/{id}/patients")]
@@ -132,12 +118,12 @@ namespace WebApplication.Controllers
                     throw new ArgumentException("Не валидный запрос");
                 }
 
-                result.Clinic = _mapper.Map<ClinicResponse>(await _repository.GetById(id));
+                result.Clinic = _mapper.Map<ClinicResponse>(await _service.GetById(id));
 
                 if (result.Clinic != null)
                 {
                     result.Patients = new List<PersonResponse>();
-                    foreach (var person in await _repository.GetPatients(id, new Paginator{Offset = offset, Limit = limit}))
+                    foreach (var person in await _service.GetPatients(id, new Paginator{Offset = offset, Limit = limit}))
                     {
                         result.Patients.Add(_mapper.Map<PersonResponse>(person));
                     }
@@ -159,7 +145,7 @@ namespace WebApplication.Controllers
             
             try
             {
-                await _repository.AttachPatient(clinic, patient);
+                await _service.AttachPatient(clinic, patient);
 
                 return Ok();
             }

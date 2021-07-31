@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using Database;
-using Database.Model;
-using DataLayer.Abstractions.Repository;
-using DataLayer.Repository;
+using BusinessLogic.Abstractions.Model;
+using BusinessLogic.Abstractions.Service;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WebApplication.RestRequest;
@@ -19,17 +17,17 @@ namespace WebApplication.Controllers
     public class KittenController : ControllerBase
     {
         private readonly ILogger<KittenController> _logger;
-        private readonly IKittenRepository _repository;
         private readonly IMapper _mapper;
+        private readonly IKittenService _service;
 
         public KittenController(
+            IKittenService service,
             ILogger<KittenController> logger,
-            ApplicationDataContext context, 
             IMapper mapper
         )
         {
+            _service = service;
             _logger = logger;
-            _repository = new KittensRepository(context);
             _mapper = mapper;
         }
 
@@ -39,12 +37,9 @@ namespace WebApplication.Controllers
             try
             {
                 _logger?.LogDebug("GetList");
-                var list = new List<KittenResponse>();
-                foreach (var kitten in await _repository.Get())
-                {
-                    list.Add(_mapper.Map<KittenResponse>(kitten));
-                }
-                return list;
+                
+                var data = await _service.GetList(0, 100);
+                return _mapper.Map<IEnumerable<KittenResponse>>(data);
             }
             catch (Exception e)
             {
@@ -60,7 +55,7 @@ namespace WebApplication.Controllers
             try
             { 
                 _logger?.LogDebug("Add", newKitten);
-                return new CreatedResult("OK", _repository.Add(_mapper.Map<Kittens>(newKitten)));
+                return new CreatedResult("OK", _service.Add(_mapper.Map<Kitten>(newKitten)));
             }
             catch (Exception e)
             {
