@@ -23,9 +23,10 @@ namespace BusinessLogic.Service
             _mapper = mapper;
         }
         
-        public Task Add(ClinicDLL entity)
+        public async Task<int> Add(ClinicDLL entity)
         {
-            return _repository.Add(_mapper.Map<ClinicBLL>(entity));
+            var data = await _repository.Add(_mapper.Map<ClinicBLL>(entity)); 
+            return data.Id;
         }
 
         public Task Update(ClinicDLL entity)
@@ -54,14 +55,15 @@ namespace BusinessLogic.Service
             throw new System.NotImplementedException();
         }
 
-        public Task AttachPatient(int clinicId, int personId)
+        public async Task<Person> AttachPatient(int clinicId, int personId)
         {
-            return _repository.AttachPatient(clinicId, personId);
+            return _mapper.Map<Person>(await _repository.AttachPatient(clinicId, personId));
         }
 
-        public Task<IEnumerable<Persons>> GetPatients(int clinicId, Paginator paginator)
+        public async Task<IEnumerable<Person>> GetPatients(int clinicId, Paginator paginator)
         {
-            return _repository.GetPatients(clinicId, paginator);
+            var data = await _repository.GetPatients(clinicId, paginator);
+            return data.Select(_mapper.Map<Person>).ToList(); 
         }
     }
 }

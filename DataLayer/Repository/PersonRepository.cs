@@ -22,10 +22,11 @@ namespace DataLayer.Repository
         public async Task<Persons> GetById(int id) => await _context.Persons.FindAsync(id);
         public async Task<IEnumerable<Persons>> Get() => await _context.Persons.ToListAsync();
 
-        public async Task Add(Persons entity)
+        public async Task<Persons> Add(Persons entity)
         {
             await _context.AddAsync(entity);
             await _context.SaveChangesAsync();
+            return entity;
         }
 
         public async Task Update(Persons entity)

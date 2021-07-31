@@ -20,9 +20,10 @@ namespace BusinessLogic.Service
             _mapper = mapper;
         }
         
-        public Task Add(Kitten entity)
+        public async Task<int> Add(Kitten entity)
         {
-            return _repository.Add(_mapper.Map<Kittens>(entity));
+            var data = await _repository.Add(_mapper.Map<Kittens>(entity));
+            return data.Id;
         }
 
         public Task Update(Kitten entity)

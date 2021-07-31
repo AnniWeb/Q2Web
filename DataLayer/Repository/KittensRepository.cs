@@ -21,10 +21,11 @@ namespace DataLayer.Repository
         public async Task<Kittens> GetById(int id) => await _context.Kittens.FindAsync(id);
         public async Task<IEnumerable<Kittens>> Get() => await _context.Kittens.ToListAsync();
 
-        public async Task Add(Kittens entity)
+        public async Task<Kittens> Add(Kittens entity)
         {
             await _context.AddAsync(entity);
             await _context.SaveChangesAsync();
+            return entity;
         }
 
         public async Task Update(Kittens entity)

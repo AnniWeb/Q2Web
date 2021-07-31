@@ -20,9 +20,10 @@ namespace BusinessLogic.Service
             _mapper = mapper;
         }
         
-        public Task Add(Person entity)
+        public async Task<int> Add(Person entity)
         {
-            return _repository.Add(_mapper.Map<Persons>(entity));
+            var data = await _repository.Add(_mapper.Map<Persons>(entity));
+            return data.Id;
         }
 
         public Task Update(Person entity)

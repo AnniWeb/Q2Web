@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using BusinessLogic;
+using BusinessLogic.Abstractions.Service;
+using BusinessLogic.Service;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -14,6 +17,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Config;
 using Database;
+using DataLayer;
+using DataLayer.Abstractions.Repository;
+using DataLayer.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace WebApplication
@@ -48,13 +54,14 @@ namespace WebApplication
                 options.UseNpgsql(Config.Config.DbConnectionString);
             });
             
-            // Репозитории
-            // services.AddSingleton<IKittenRepository, KittensRepository>();
-            
             // Мапперы
             var mapperConfiguration = new MapperConfiguration(mp => mp.AddProfile(new MapperProfile()));
             var mapper = mapperConfiguration.CreateMapper();
             services.AddSingleton(mapper);
+            
+            services
+                .AddDataLayer()
+                .AddBusinessLogicLayer();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

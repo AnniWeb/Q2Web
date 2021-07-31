@@ -8,7 +8,7 @@ namespace BusinessLogic.Abstractions.Service
         where TEntity: BaseModel<TIdType>
         where TIdType: struct
     {
-        Task Add(TEntity entity);
+        Task<TIdType> Add(TEntity entity);
         Task Update(TEntity entity);
         Task Delete(TIdType id);
         Task<TEntity> GetById(TIdType id);

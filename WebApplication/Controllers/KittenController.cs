@@ -50,20 +50,24 @@ namespace WebApplication.Controllers
         }
         
         [HttpPost]
-        public IActionResult Add(KittenRequest newKitten)
+        public async Task<ActionResult> Add(KittenRequest newKitten)
         {
             try
             { 
                 _logger?.LogDebug("Add", newKitten);
-                return new CreatedResult("OK", _service.Add(_mapper.Map<Kitten>(newKitten)));
+                var data = _service.Add(_mapper.Map<Kitten>(newKitten));
+
+                if (data != null)
+                {
+                    return new CreatedResult("Ok", data);
+                }
             }
             catch (Exception e)
             {
                 _logger?.LogError("Add", e);
-                Console.WriteLine(e);
-                return Problem(); 
             }
             
+            return Problem(); 
         }
     }
 }

@@ -11,6 +11,7 @@ namespace DataLayer.Repository
 {
     public class ClinicRepository : IClinicRepository
     {
+        
         private ApplicationDataContext _context;
 
         public ClinicRepository(ApplicationDataContext context)
@@ -21,10 +22,11 @@ namespace DataLayer.Repository
         public async Task<Clinic> GetById(int id) => await _context.Clinics.FindAsync(id);
         public async Task<IEnumerable<Clinic>> Get() => await _context.Clinics.ToListAsync();
         
-        public async Task Add(Clinic entity)
+        public async Task<Clinic> Add(Clinic entity)
         {
             await _context.AddAsync(entity);
             await _context.SaveChangesAsync();
+            return entity;
         }
 
         public async Task Update(Clinic entity)
@@ -44,10 +46,10 @@ namespace DataLayer.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task AttachPatient(int clinicId, int personId)
+        public async Task<Persons> AttachPatient(int clinicId, int personId)
         {
             var person = await _context.Persons.FindAsync(personId);
-            var clinic = await _context.Clinics.FindAsync(clinicId);
+            var clinic = await _context.Clinics.Include(c => c.Patients).FirstOrDefaultAsync(c => c.Id == clinicId);
             if (person != null && clinic != null && (clinic.Patients == null || !clinic.Patients.Contains(person)))
             {
                 if (clinic.Patients == null)
@@ -57,6 +59,8 @@ namespace DataLayer.Repository
                 clinic.Patients.Add(person);
                 await Update(clinic);
             }
+
+            return person;
         }
 
         public async Task<IEnumerable<Persons>> GetPatients(int clinicId, Paginator paginator)

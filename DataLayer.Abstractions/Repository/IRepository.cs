@@ -7,7 +7,7 @@ namespace DataLayer.Abstractions.Repository
 {
     public interface IRepository<TEntity> where TEntity : BaseModel<int>
     {
-        Task Add(TEntity entity);
+        Task<TEntity> Add(TEntity entity);
  
         Task<IEnumerable<TEntity>> Get();
         

@@ -107,18 +107,25 @@ namespace WebApplication.Controllers
         
         [HttpPost("/persons")]
         [Description("Добавление новой персоны в коллекцию")]
-        public async Task Add([FromBody] PersonRequest newPerson)
+        public async Task<ActionResult> Add([FromBody] PersonRequest newPerson)
         {
             _logger?.LogDebug("Add", newPerson);
             
             try
             {
-                await _service.Add(_mapper.Map<Person>(newPerson));
+                var data = await _service.Add(_mapper.Map<Person>(newPerson));
+                
+                if (data != null)
+                {
+                    return new CreatedResult("Ok", data);
+                }
             }
             catch (Exception e)
             {
                 _logger?.LogError("Add", e);
             }
+            
+            return Problem();
         }
         
         [HttpPut("/persons")]

@@ -6,6 +6,6 @@ namespace WebApplication.RestResponse
     public class ListPatientsOfClinicResponse
     {
         public ClinicResponse Clinic { get; set; }
-        public IList<PersonResponse> Patients { get; set; }
+        public IEnumerable<PersonResponse> Patients { get; set; }
     }
 }

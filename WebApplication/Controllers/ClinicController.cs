@@ -59,18 +59,25 @@ namespace WebApplication.Controllers
         
         [HttpPost("/clinics")]
         [Description("Добавление новой клиники в коллекцию")]
-        public async Task Add([FromBody] ClinicRequest clinic)
+        public async Task<ActionResult> Add([FromBody] ClinicRequest clinic)
         {
             _logger?.LogDebug("Add", clinic);
             
             try
             {
-                await _service.Add(_mapper.Map<Clinic>(clinic));
+                var data = await _service.Add(_mapper.Map<Clinic>(clinic));
+
+                if (data != null)
+                {
+                    return new CreatedResult("Ok", data);
+                }
             }
             catch (Exception e)
             {
                 _logger?.LogError("Add", e);
             }
+
+            return Problem();
         }
         
         [HttpPut("/clinics")]
@@ -122,11 +129,8 @@ namespace WebApplication.Controllers
 
                 if (result.Clinic != null)
                 {
-                    result.Patients = new List<PersonResponse>();
-                    foreach (var person in await _service.GetPatients(id, new Paginator{Offset = offset, Limit = limit}))
-                    {
-                        result.Patients.Add(_mapper.Map<PersonResponse>(person));
-                    }
+                    var patients = await _service.GetPatients(id, new Paginator {Offset = offset, Limit = limit});
+                    result.Patients = _mapper.Map<IEnumerable<PersonResponse>>(patients);
                 }
                 
             }
@@ -145,9 +149,13 @@ namespace WebApplication.Controllers
             
             try
             {
-                await _service.AttachPatient(clinic, patient);
+                var person = await _service.AttachPatient(clinic, patient);
 
-                return Ok();
+                if (person == null)
+                {
+                    return NotFound();
+                }
+                return Ok(person.Id);
             }
             catch (Exception e)
             {
