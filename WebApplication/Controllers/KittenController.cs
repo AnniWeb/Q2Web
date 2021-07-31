@@ -12,8 +12,9 @@ using WebApplication.RestResponse;
 
 namespace WebApplication.Controllers
 {
-    [ApiController]
-    [Route("kittens")]
+    // дальше будут только персоны и клиники
+    // [ApiController]
+    // [Route("kittens")]
     public class KittenController : ControllerBase
     {
         private readonly ILogger<KittenController> _logger;
