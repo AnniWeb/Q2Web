@@ -1,6 +1,6 @@
 ﻿using Database.Model;
 
-namespace Database.Repository
+namespace DataLayer.Abstractions.Repository
 {
     public interface IKittenRepository : IRepository<Kittens>
     {

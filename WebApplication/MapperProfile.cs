@@ -1,7 +1,11 @@
-﻿using AutoMapper;
+﻿using System.Collections.ObjectModel;
+using AutoMapper;
+using BusinessLogic.Abstractions.Model;
 using Database.Model;
 using WebApplication.RestRequest;
 using WebApplication.RestResponse;
+using ClinicBLL = BusinessLogic.Abstractions.Model.Clinic;
+using ClinicDLL = Database.Model.Clinic;
 
 namespace WebApplication
 {
@@ -9,11 +13,23 @@ namespace WebApplication
     {
         public MapperProfile()
         {
-            CreateMap<Kittens, KittenResponse>();
-            CreateMap<KittenRequest, Kittens>();
-            CreateMap<DbPersonRequest, Persons>();
-            CreateMap<PersonRequest, Persons>();
-            CreateMap<Persons, PersonResponse>();
+            // BLL <=> Rest
+            CreateMap<Kitten, KittenResponse>();
+            CreateMap<KittenRequest, Kitten>();
+            CreateMap<DbPersonRequest, Person>();
+            CreateMap<PersonRequest, Person>();
+            CreateMap<Person, PersonResponse>();
+            CreateMap<DbClinicRequest, ClinicBLL>();
+            CreateMap<ClinicRequest, ClinicBLL>();
+            CreateMap<ClinicBLL, ClinicResponse>();
+            
+            // DLL <=> BLL
+            CreateMap<Kitten, Kittens>();
+            CreateMap<Kittens, Kitten>();
+            CreateMap<Person, Persons>();
+            CreateMap<Persons, Person>();
+            CreateMap<ClinicDLL, ClinicBLL>();
+            CreateMap<ClinicBLL, ClinicDLL>();
         }
     }
 }

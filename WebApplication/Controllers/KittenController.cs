@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using Database;
-using Database.Model;
-using Database.Repository;
+using BusinessLogic.Abstractions.Model;
+using BusinessLogic.Abstractions.Service;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WebApplication.RestRequest;
@@ -18,32 +17,29 @@ namespace WebApplication.Controllers
     public class KittenController : ControllerBase
     {
         private readonly ILogger<KittenController> _logger;
-        private IKittenRepository _repository;
-        private IMapper _mapper;
+        private readonly IMapper _mapper;
+        private readonly IKittenService _service;
 
         public KittenController(
+            IKittenService service,
             ILogger<KittenController> logger,
-            ApplicationDataContext context, 
             IMapper mapper
         )
         {
+            _service = service;
             _logger = logger;
-            _repository = new KittensRepository(context);
             _mapper = mapper;
         }
 
         [HttpGet]
-        public IEnumerable<KittenResponse> GetList()
+        public async Task<IEnumerable<KittenResponse>> GetList()
         {
             try
             {
                 _logger?.LogDebug("GetList");
-                var list = new List<KittenResponse>();
-                foreach (var kitten in _repository.Get())
-                {
-                    list.Add(_mapper.Map<KittenResponse>(kitten));
-                }
-                return list;
+                
+                var data = await _service.GetList(0, 100);
+                return _mapper.Map<IEnumerable<KittenResponse>>(data);
             }
             catch (Exception e)
             {
@@ -54,20 +50,24 @@ namespace WebApplication.Controllers
         }
         
         [HttpPost]
-        public IActionResult Add(KittenRequest newKitten)
+        public async Task<ActionResult> Add(KittenRequest newKitten)
         {
             try
             { 
                 _logger?.LogDebug("Add", newKitten);
-                return new CreatedResult("OK", _repository.Add(_mapper.Map<Kittens>(newKitten)));
+                var data = _service.Add(_mapper.Map<Kitten>(newKitten));
+
+                if (data != null)
+                {
+                    return new CreatedResult("Ok", data);
+                }
             }
             catch (Exception e)
             {
                 _logger?.LogError("Add", e);
-                Console.WriteLine(e);
-                return Problem(); 
             }
             
+            return Problem(); 
         }
     }
 }

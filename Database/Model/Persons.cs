@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Database.Model
 {
@@ -10,5 +11,7 @@ namespace Database.Model
         
         [Column(TypeName = "varchar(200)")]
         public string SecondName { get; set; }
+        
+        public ICollection<Clinic> Clinics { get; set; }
     }
 }

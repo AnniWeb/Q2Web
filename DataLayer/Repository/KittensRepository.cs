@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Database;
 using Database.Model;
 using Microsoft.EntityFrameworkCore;
+using DataLayer.Abstractions.Repository;
 
-namespace Database.Repository
+namespace DataLayer.Repository
 {
     public class KittensRepository : IKittenRepository
     {
@@ -19,10 +21,11 @@ namespace Database.Repository
         public async Task<Kittens> GetById(int id) => await _context.Kittens.FindAsync(id);
         public async Task<IEnumerable<Kittens>> Get() => await _context.Kittens.ToListAsync();
 
-        public async Task Add(Kittens entity)
+        public async Task<Kittens> Add(Kittens entity)
         {
             await _context.AddAsync(entity);
             await _context.SaveChangesAsync();
+            return entity;
         }
 
         public async Task Update(Kittens entity)
